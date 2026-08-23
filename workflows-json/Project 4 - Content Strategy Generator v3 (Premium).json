@@ -1,0 +1,428 @@
+{
+  "name": "Project 4 - Content Strategy Generator v3 (Premium)",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "mistral-large-latest",
+        "options": {
+          "maxTokens": 12000,
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        816,
+        560
+      ],
+      "id": "c6f8a4e6-ebcb-4926-b6e0-08adfa6b823e",
+      "name": "Mistral",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "Q6cAH0K8nnlpZ49i",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "ac28f5c4-9418-4a2e-aa2a-798dac877505",
+        "formTitle": "Project 4: Upload Your Reports",
+        "formDescription": "Upload your Project 2 (Market Analysis) and Project 3 (Competitor Analysis) HTML reports to generate a comprehensive content strategy.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Product Category",
+              "placeholder": "e.g., Area Rug, Table Lamp, Throw Pillow",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Focus Area",
+              "placeholder": "e.g., Natural & Sustainable, Modern Minimalist"
+            },
+            {
+              "fieldLabel": "P2 Market Analysis Report",
+              "fieldType": "file",
+              "acceptFileTypes": ".html",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "P3 Competitor Analysis Report",
+              "fieldType": "file",
+              "acceptFileTypes": ".html",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Tunable Parameters Section",
+              "fieldType": "html",
+              "html": "<div style=\"margin-top:24px;padding-top:16px;border-top:2px solid #e0d4e6;\"><h3 style=\"color:#7B2D8E;margin:0 0 4px 0;font-family:'Segoe UI',Tahoma,sans-serif;\">⚙️ Tunable Parameters</h3><p style=\"color:#666;font-size:0.9em;margin:0;font-family:'Segoe UI',Tahoma,sans-serif;\">Optional strategic filters. Leave any blank to let the reports drive that dimension.</p></div>"
+            },
+            {
+              "fieldLabel": "🎯 Target Audience",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  { "option": "General Audience" },
+                  { "option": "First-time Homebuyers (25–34)" },
+                  { "option": "Young Professionals / Renters (22–30)" },
+                  { "option": "Growing Families (30–45)" },
+                  { "option": "Empty Nesters / Downsizers (55+)" },
+                  { "option": "Interior Design Enthusiasts" },
+                  { "option": "Budget-Conscious Shoppers" },
+                  { "option": "Luxury / Premium Buyers" }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "🏁 Content Goal",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  { "option": "Brand Awareness" },
+                  { "option": "Conversion / Sales" },
+                  { "option": "Product Launch" },
+                  { "option": "Education / How-To" },
+                  { "option": "Customer Retention" },
+                  { "option": "SEO Growth" }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "📅 Seasonal Context",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  { "option": "Year-Round / Evergreen" },
+                  { "option": "Spring Refresh" },
+                  { "option": "Summer Entertaining" },
+                  { "option": "Back-to-School / Fall" },
+                  { "option": "Holiday / Winter" },
+                  { "option": "New Year / Winter Refresh" }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "📱 Primary Channel",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  { "option": "Multi-Channel" },
+                  { "option": "Blog / SEO" },
+                  { "option": "Email" },
+                  { "option": "Instagram" },
+                  { "option": "TikTok" },
+                  { "option": "Pinterest" },
+                  { "option": "Facebook" }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Audience Research Report",
+              "fieldType": "file",
+              "acceptFileTypes": ".html"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.1,
+      "position": [
+        336,
+        336
+      ],
+      "id": "53ec949d-d9e4-4948-a0be-9a2a56705f9c",
+      "name": "Upload Form1",
+      "webhookId": "ac28f5c4-9418-4a2e-aa2a-798dac877505"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst item = items[0];\nconst form = item.json;\n\nconst category =\n  form['Product Category'] ||\n  form.category ||\n  'Area Rug';\n\nconst focus =\n  form['Focus Area'] ||\n  form.focus ||\n  '';\n\nconst targetAudience =\n  form['🎯 Target Audience'] ||\n  form['Target Audience'] ||\n  form.target_audience ||\n  '';\n\nconst contentGoal =\n  form['🏁 Content Goal'] ||\n  form['Content Goal'] ||\n  form.content_goal ||\n  '';\n\nconst seasonalContext =\n  form['📅 Seasonal Context'] ||\n  form['Seasonal Context'] ||\n  form.seasonal_context ||\n  '';\n\nconst primaryChannel =\n  form['📱 Primary Channel'] ||\n  form['Primary Channel'] ||\n  form.primary_channel ||\n  '';\n\nconst readBinaryFileAsText = async (binaryPropertyName) => {\n  if (!item.binary?.[binaryPropertyName]) {\n    return '';\n  }\n\n  const buffer = await this.helpers.getBinaryDataBuffer(\n    0,\n    binaryPropertyName\n  );\n\n  return buffer.toString('utf8');\n};\n\nconst p2Content = await readBinaryFileAsText(\n  'P2_Market_Analysis_Report'\n);\n\nconst p3Content = await readBinaryFileAsText(\n  'P3_Competitor_Analysis_Report'\n);\n\nconst audienceResearchContent = await readBinaryFileAsText(\n  'Audience_Research_Report'\n);\n\nconst stripHtml = (html) => {\n  return html\n    .replace(/<script[^>]*>[\\s\\S]*?<\\/script>/gi, '')\n    .replace(/<style[^>]*>[\\s\\S]*?<\\/style>/gi, '')\n    .replace(/<[^>]+>/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim();\n};\n\nconst p2Text = stripHtml(p2Content).slice(0, 15000);\nconst p3Text = stripHtml(p3Content).slice(0, 15000);\nconst audienceResearchText = stripHtml(audienceResearchContent).slice(0, 15000);\n\nreturn [\n  {\n    json: {\n      category,\n      focus,\n      target_audience: targetAudience,\n      content_goal: contentGoal,\n      seasonal_context: seasonalContext,\n      primary_channel: primaryChannel,\n      p2_content: p2Text,\n      p3_content: p3Text,\n      audience_research: audienceResearchText,\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        336
+      ],
+      "id": "ff016a5e-48d2-42dc-95c0-d38c0f94247e",
+      "name": "Extract Files1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=PRODUCT CATEGORY:\n{{ $json.category }}\n\nFOCUS AREA:\n{{ $json.focus }}\n\n\nPROJECT 2 — MARKET ANALYSIS:\n{{ $json.p2_content }}\n\nPROJECT 3 — COMPETITOR ANALYSIS:\n{{ $json.p3_content }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a senior content strategist for Wayfair.\n\nAnalyze the supplied Project 2 market analysis and Project 3 competitor analysis, then create a comprehensive content strategy for the specified product category and focus area.\n\nRequirements:\n\n- Base the strategy only on information contained in the supplied reports.\n- Extract and use specific quantitative data points when they are available, including percentages, growth figures, price ranges, search trends, and other market statistics.\n- Do not invent, estimate, or assume quantitative data that is not explicitly supported by the reports.\n- Identify specific market trends, customer needs, competitor gaps, and content opportunities.\n- Clearly distinguish findings from Project 2 and Project 3.\n- Connect each strategic recommendation to relevant evidence from the reports.\n- Ensure content ideas, campaigns, competitive angles, and priorities are specific to the supplied product category rather than generic marketing advice.\n- When a required field cannot be supported by the reports, use an appropriate empty value rather than fabricating information.\n- Follow the structure required by the connected output parser.\n- Return only the requested structured output, with no introductory or concluding commentary outside it."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        816,
+        336
+      ],
+      "id": "cb8e14d5-182c-4329-93dc-f762c8a45100",
+      "name": "Base Strategy AI"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=BASE STRATEGY (JSON):\n{{ JSON.stringify($json.output) }}\n\nPRODUCT CATEGORY:\n{{ $('Extract Files1').first().json.category }}\n\nFOCUS AREA:\n{{ $('Extract Files1').first().json.focus }}\n\nTUNABLE PARAMETERS:\n- Target Audience: {{ $('Extract Files1').first().json.target_audience }}\n- Content Goal: {{ $('Extract Files1').first().json.content_goal }}\n- Seasonal Context: {{ $('Extract Files1').first().json.seasonal_context }}\n- Primary Channel: {{ $('Extract Files1').first().json.primary_channel }}\n\nAUDIENCE RESEARCH REPORT (optional; may be empty):\n{{ $('Extract Files1').first().json.audience_research }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a content strategy adapter for Wayfair.\n\nYou receive a base content strategy (as JSON) that was grounded in Project 2 (market analysis) and Project 3 (competitor analysis) reports. You also receive optional tunable parameters. Your job is to adapt the base strategy so it reflects the tunable parameters, without regenerating the underlying evidence.\n\nRules:\n\n- Preserve exactly as-is from the base strategy: key_metrics and data_foundation (both p2_insights and p3_insights). Do not add, remove, or modify metrics or evidence bullets.\n- Adapt these fields to reflect the tunable parameters where they are set: executive_summary, content_ideas (titles, descriptions, formats, seo_keywords, data_connection wording), social_captions, campaigns (name, tagline, description, details), email_subjects, competitive_angles, and content_priorities (ordering and rationale).\n- If a Target Audience is provided, tailor tone, examples, imagery cues, and messaging to that audience.\n- If an Audience Research Report is provided, treat it as the primary evidence for any audience-specific claim (needs, motivations, behaviors, preferences, purchase drivers). If a Target Audience is selected without a report, use only broad, defensible characterizations — do not invent audience statistics, demographics, or behavioral specifics.\n- If a Content Goal is provided, weight content mix, CTAs, and campaign framing toward that goal (e.g., conversion-driven CTAs vs. educational depth vs. launch hype vs. retention nurture).\n- If a Seasonal Context is provided, reflect it in campaign timing, themes, email subjects, and social hooks.\n- If a Primary Channel is provided, prioritize ideas, formats, and captions for that channel while still covering the others as secondary; reorder content_priorities so channel-aligned items rank higher.\n- Every adaptation must remain traceable to the same underlying P2/P3 evidence surfaced in the base strategy. Do not invent new metrics, competitor claims, or trends.\n- If all tunable parameters are blank, empty strings, or unset, return the base strategy unchanged.\n- Use exactly the same output schema as the base strategy (defined by the connected output parser). Every top-level field must be present.\n- Return only the requested structured output, with no introductory or concluding commentary outside it."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1168,
+        336
+      ],
+      "id": "7f3d9c1a-4b8e-4d2a-91c6-2e5f8a7b0d34",
+      "name": "Tunable Strategy AI"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst c = data.content || {};\nconst category = data.category || 'Area Rug';\nconst focus = data.focus || 'Natural & Sustainable';\nconst targetAudience = data.target_audience || '';\nconst contentGoal = data.content_goal || '';\nconst seasonalContext = data.seasonal_context || '';\nconst primaryChannel = data.primary_channel || '';\nconst today = new Date().toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'});\nconst esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n\n// Key Metrics Cards\nconst metrics = c.key_metrics || [];\nlet metricsHtml = metrics.map(m => `\n  <div class=\"insight-card\">\n    <div class=\"number\">${esc(m.value)}</div>\n    <div class=\"label\">${esc(m.label)}</div>\n  </div>\n`).join('');\n\n// Data Foundation\nconst df = c.data_foundation || {};\nlet p2List = (df.p2_insights || []).map(i => `<li>${esc(i)}</li>`).join('');\nlet p3List = (df.p3_insights || []).map(i => `<li>${esc(i)}</li>`).join('');\n\n// Content Ideas\nconst ideas = c.content_ideas || [];\nlet ideasHtml = ideas.map(i => {\n  const kws = (i.seo_keywords || []).map(k => `<span class=\"keyword\">${esc(k)}</span>`).join('');\n  return `\n  <div class=\"content-card\">\n    <div class=\"content-card-header\">\n      <div class=\"type\">${esc(i.type)}</div>\n      <h4>${esc(i.title)}</h4>\n    </div>\n    <div class=\"content-card-body\">\n      <p>${esc(i.description)}</p>\n      <div class=\"data-tag\">📊 ${esc(i.data_connection)}</div>\n      ${kws ? `<div class=\"keywords\">${kws}</div>` : ''}\n    </div>\n  </div>`;\n}).join('');\n\n// Social Captions\nconst soc = c.social_captions || {};\nlet igHtml = (soc.instagram || []).map(p => `\n  <div class=\"social-post\">\n    <div class=\"platform-badge ig\">Instagram</div>\n    <p>${esc(p.caption)}</p>\n    <div class=\"hashtags\">${(p.hashtags || []).join(' ')}</div>\n  </div>\n`).join('');\nlet pinHtml = (soc.pinterest || []).map(p => `\n  <div class=\"social-post\">\n    <div class=\"platform-badge pin\">Pinterest</div>\n    <p><strong>${esc(p.title)}</strong></p>\n    <p>${esc(p.description)}</p>\n  </div>\n`).join('');\nlet fbHtml = (soc.facebook || []).map(p => `\n  <div class=\"social-post\">\n    <div class=\"platform-badge fb\">Facebook</div>\n    <p>${esc(p.post)}</p>\n  </div>\n`).join('');\nlet ttHtml = (soc.tiktok || []).map(p => `\n  <div class=\"social-post\">\n    <div class=\"platform-badge tt\">TikTok</div>\n    <p><strong>Hook:</strong> ${esc(p.hook)}</p>\n    <p>${esc(p.script)}</p>\n  </div>\n`).join('');\n\n// Campaigns\nconst camps = c.campaigns || [];\nlet campsHtml = camps.map(camp => {\n  const det = camp.details || {};\n  let detailsHtml = Object.entries(det).map(([k, v]) => `\n    <div class=\"campaign-detail\">\n      <h5>${k.replace(/_/g, ' ').replace(/\\b\\w/g, c => c.toUpperCase())}</h5>\n      <p>${esc(v)}</p>\n    </div>\n  `).join('');\n  return `\n  <div class=\"campaign-card\">\n    <h4>Campaign: \"${esc(camp.name)}\"</h4>\n    <div class=\"tagline\">\"${esc(camp.tagline)}\"</div>\n    <p>${esc(camp.description)}</p>\n    <div class=\"campaign-details\">${detailsHtml}</div>\n  </div>`;\n}).join('');\n\n// Email Subjects\nconst emails = c.email_subjects || [];\nlet emailsHtml = emails.map(e => {\n  const rateClass = e.open_rate === 'high' ? 'high' : 'medium';\n  return `\n  <div class=\"email-subject\">\n    <span class=\"icon\">${e.icon || '📧'}</span>\n    <span class=\"subject-text\">${esc(e.subject)}</span>\n    <span class=\"open-rate ${rateClass}\">Est. ${e.open_rate === 'high' ? 'High' : 'Medium'} Open</span>\n  </div>`;\n}).join('');\n\n// Competitive Angles\nconst angles = c.competitive_angles || [];\nlet anglesHtml = angles.map(a => `\n  <div class=\"competitive-angle\">\n    <h4>Angle: \"${esc(a.title)}\"</h4>\n    <p><strong>Competitor Gap:</strong> ${esc(a.competitor_gap)}</p>\n    <p><strong>Wayfair Opportunity:</strong> ${esc(a.wayfair_opportunity)}</p>\n  </div>\n`).join('');\n\n// Content Priorities\nconst priorities = c.content_priorities || [];\nlet prioritiesHtml = priorities.map(p => {\n  const prioClass = p.priority <= 2 ? 'high' : 'medium';\n  return `\n  <div class=\"recommendation\">\n    <div class=\"priority ${prioClass}\">${p.priority}</div>\n    <div class=\"recommendation-content\">\n      <h4>${esc(p.title)}</h4>\n      <p>${esc(p.rationale)}</p>\n    </div>\n  </div>`;\n}).join('');\n\nconst html = `<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>AI Insights & Content Report | Wayfair ${esc(category)}</title>\n  <style>\n    * { margin: 0; padding: 0; box-sizing: border-box; }\n    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f8f9fa; }\n    .container { max-width: 1100px; margin: 0 auto; padding: 20px; }\n    \n    /* Header */\n    .header { background: linear-gradient(135deg, #7B2D8E 0%, #5E1A6E 100%); color: white; padding: 40px; border-radius: 12px; margin-bottom: 30px; }\n    .header h1 { font-size: 2.2em; margin-bottom: 10px; }\n    .header .subtitle { font-size: 1.2em; opacity: 0.9; }\n    .header .meta { margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap; }\n    .header .meta-item { background: rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 20px; font-size: 0.9em; }\n    \n    /* Sections */\n    .section { background: white; border-radius: 12px; padding: 30px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }\n    .section h2 { color: #7B2D8E; font-size: 1.5em; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #f0e6f4; }\n    .section h3 { color: #5E1A6E; font-size: 1.2em; margin: 25px 0 15px 0; }\n    .section > p { color: #666; margin-bottom: 20px; }\n    \n    /* Executive Summary */\n    .exec-summary { background: linear-gradient(135deg, #f8f4fa 0%, #fff 100%); border-left: 4px solid #7B2D8E; }\n    .exec-summary p { font-size: 1.05em; margin-bottom: 15px; white-space: pre-line; }\n    \n    /* Key Insights Cards */\n    .key-insights { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }\n    .insight-card { background: white; border: 1px solid #e0d4e6; border-radius: 8px; padding: 20px; text-align: center; }\n    .insight-card .number { font-size: 2.2em; font-weight: bold; color: #7B2D8E; }\n    .insight-card .label { font-size: 0.85em; color: #666; margin-top: 5px; }\n    \n    /* Data Foundation */\n    .data-sources { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }\n    .data-source-card { background: #f8f9fa; border-radius: 8px; padding: 20px; }\n    .data-source-card h4 { color: #7B2D8E; margin-bottom: 12px; }\n    .data-source-card ul { list-style: none; padding-left: 0; }\n    .data-source-card li { padding: 8px 0; border-bottom: 1px solid #e9ecef; font-size: 0.95em; }\n    .data-source-card li:last-child { border-bottom: none; }\n    \n    /* Content Ideas */\n    .content-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }\n    .content-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }\n    .content-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }\n    .content-card-header { background: linear-gradient(135deg, #7B2D8E 0%, #9B4DB8 100%); color: white; padding: 15px 20px; }\n    .content-card-header .type { font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }\n    .content-card-header h4 { font-size: 1.1em; margin-top: 5px; }\n    .content-card-body { padding: 20px; }\n    .content-card-body p { color: #555; margin-bottom: 15px; }\n    .data-tag { display: inline-block; background: #f0e6f4; color: #7B2D8E; padding: 6px 12px; border-radius: 15px; font-size: 0.85em; margin-bottom: 10px; }\n    .keywords { margin-top: 10px; }\n    .keyword { display: inline-block; background: #e9ecef; color: #666; padding: 4px 10px; border-radius: 12px; font-size: 0.8em; margin: 3px 3px 3px 0; }\n    \n    /* Social Posts */\n    .social-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }\n    .social-post { background: #f8f9fa; border-radius: 8px; padding: 15px; }\n    .platform-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; font-weight: 600; color: white; margin-bottom: 10px; }\n    .platform-badge.ig { background: linear-gradient(45deg, #f09433, #dc2743); }\n    .platform-badge.pin { background: #E60023; }\n    .platform-badge.fb { background: #1877F2; }\n    .platform-badge.tt { background: #000; }\n    .social-post p { font-size: 0.95em; margin-bottom: 8px; }\n    .hashtags { color: #7B2D8E; font-size: 0.85em; }\n    \n    /* Campaigns */\n    .campaign-card { background: linear-gradient(135deg, #f8f4fa 0%, #fff 100%); border: 1px solid #e0d4e6; border-radius: 10px; padding: 25px; margin-bottom: 20px; }\n    .campaign-card h4 { color: #5E1A6E; font-size: 1.3em; margin-bottom: 8px; }\n    .campaign-card .tagline { color: #7B2D8E; font-style: italic; font-size: 1.1em; margin-bottom: 15px; }\n    .campaign-card > p { margin-bottom: 20px; }\n    .campaign-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }\n    .campaign-detail { background: white; padding: 15px; border-radius: 8px; }\n    .campaign-detail h5 { color: #7B2D8E; font-size: 0.9em; margin-bottom: 8px; }\n    .campaign-detail p { font-size: 0.9em; color: #555; }\n    \n    /* Email Subjects */\n    .email-ideas { display: flex; flex-direction: column; gap: 10px; }\n    .email-subject { display: flex; align-items: center; gap: 15px; background: #f8f9fa; padding: 15px 20px; border-radius: 8px; }\n    .email-subject .icon { font-size: 1.3em; }\n    .email-subject .subject-text { flex: 1; font-size: 1em; }\n    .email-subject .open-rate { background: #e0f2e9; color: #059669; padding: 5px 12px; border-radius: 15px; font-size: 0.8em; font-weight: 500; }\n    .email-subject .open-rate.medium { background: #fef3c7; color: #d97706; }\n    \n    /* Competitive Angles */\n    .competitive-angle { background: #f8f9fa; border-left: 4px solid #7B2D8E; padding: 20px; margin-bottom: 15px; border-radius: 0 8px 8px 0; }\n    .competitive-angle h4 { color: #5E1A6E; margin-bottom: 12px; }\n    .competitive-angle p { margin-bottom: 10px; font-size: 0.95em; }\n    \n    /* Priorities */\n    .recommendation { display: flex; gap: 20px; margin-bottom: 15px; align-items: flex-start; }\n    .priority { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2em; color: white; flex-shrink: 0; }\n    .priority.high { background: #7B2D8E; }\n    .priority.medium { background: #9B4DB8; }\n    .recommendation-content { flex: 1; background: #f8f9fa; padding: 15px 20px; border-radius: 8px; }\n    .recommendation-content h4 { color: #5E1A6E; margin-bottom: 8px; }\n    .recommendation-content p { font-size: 0.95em; color: #555; }\n    \n    /* Footer */\n    .footer { background: #5E1A6E; color: white; padding: 30px; border-radius: 12px; text-align: center; margin-top: 30px; }\n    .footer .logo { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }\n    .footer p { opacity: 0.9; font-size: 0.9em; margin-top: 5px; }\n    \n    @media (max-width: 768px) {\n      .data-sources, .content-grid, .social-grid, .campaign-details { grid-template-columns: 1fr; }\n      .header .meta { flex-direction: column; gap: 10px; }\n      .recommendation { flex-direction: column; gap: 10px; }\n      .priority { margin: 0 auto; }\n    }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <header class=\"header\">\n      <h1>AI Insights & Content Report</h1>\n      <p class=\"subtitle\">Wayfair ${esc(category)}${focus ? ' - ' + esc(focus) : ''}</p>\n      <div class=\"meta\">\n        <span class=\"meta-item\">📅 ${today}</span>\n        ${targetAudience ? `<span class=\"meta-item\">🎯 ${esc(targetAudience)}</span>` : ''}\n        ${contentGoal ? `<span class=\"meta-item\">🏁 ${esc(contentGoal)}</span>` : ''}\n        ${seasonalContext ? `<span class=\"meta-item\">🗓️ ${esc(seasonalContext)}</span>` : ''}\n        ${primaryChannel ? `<span class=\"meta-item\">📱 ${esc(primaryChannel)}</span>` : ''}\n        <span class=\"meta-item\">📊 ${metrics.length} Key Data Points</span>\n        <span class=\"meta-item\">💡 ${ideas.length} Content Ideas</span>\n        <span class=\"meta-item\">💡 Social Media Captions</span>\n        <span class=\"meta-item\">🎯 ${camps.length} Campaigns</span>\n        <span class=\"meta-item\">💡 Email Subject Lines</span>\n        <span class=\"meta-item\">💡 Competitive Content Angles</span>\n        <span class=\"meta-item\">💡 Recommended Content Priorities</span>\n      </div>\n    </header>\n    \n    <section class=\"section exec-summary\">\n      <h2>📋 Executive Summary</h2>\n      <p>${esc(c.executive_summary || '')}</p>\n      <div class=\"key-insights\">${metricsHtml}</div>\n    </section>\n    \n    <section class=\"section\">\n      <h2>📊 Data Foundation</h2>\n      <p>Key insights extracted from your Project 2 and Project 3 reports that inform this content strategy:</p>\n      <div class=\"data-sources\">\n        <div class=\"data-source-card\">\n          <h4>📈 From Market Analysis (P2)</h4>\n          <ul>${p2List}</ul>\n        </div>\n        <div class=\"data-source-card\">\n          <h4>🔍 From Competitor Analysis (P3)</h4>\n          <ul>${p3List}</ul>\n        </div>\n      </div>\n    </section>\n    \n    <section class=\"section\">\n      <h2>💡 Content Ideas</h2>\n      <p>Strategic content recommendations, each tied to specific data insights from your reports:</p>\n      <div class=\"content-grid\">${ideasHtml}</div>\n    </section>\n    \n    <section class=\"section\">\n      <h2>📱 Social Media Captions</h2>\n      <p>Ready-to-use captions optimized for each platform:</p>\n      <div class=\"social-grid\">\n        ${igHtml}${pinHtml}${fbHtml}${ttHtml}\n      </div>\n    </section>\n    \n    <section class=\"section\">\n      <h2>🎯 Campaign Concepts</h2>\n      <p>Larger initiatives that bundle content around strategic themes:</p>\n      ${campsHtml}\n    </section>\n    \n    <section class=\"section\">\n      <h2>📧 Email Subject Lines</h2>\n      <p>High-performing subject lines based on trend themes. Each connects to specific data points.</p>\n      <div class=\"email-ideas\">${emailsHtml}</div>\n    </section>\n    \n    <section class=\"section\">\n      <h2>⚔️ Competitive Content Angles</h2>\n      <p>Content strategies that directly address gaps identified in competitor analysis:</p>\n      ${anglesHtml}\n    </section>\n    \n    <section class=\"section\">\n      <h2>📅 Recommended Content Priorities</h2>\n      <p>Based on trend momentum and competitive gaps, here's the suggested priority order:</p>\n      ${prioritiesHtml}\n    </section>\n    \n    <footer class=\"footer\">\n      <div class=\"logo\">Wayfair | AI Insights & Content Agent</div>\n      <p>Report generated from Market Trend Discovery (P2) and Competitor Monitoring (P3) data</p>\n      <p>Category: ${esc(category)}${focus ? ' | Focus: ' + esc(focus) : ''} | Date: ${today}</p>\n    </footer>\n  </div>\n</body>\n</html>`;\n\nreturn [{json: {html, category, focus}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1584,
+        336
+      ],
+      "id": "72219966-b997-4c87-997f-74d026ecdf3f",
+      "name": "Build HTML1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const html = $input.first().json.html;\nconst cat = $input.first().json.category || 'Area Rug';\nconst ts = new Date().toISOString().split('T')[0];\nconst fileName = `Wayfair_${cat.replace(/\\s+/g, '_')}_Content_Strategy_${ts}.html`;\n\nreturn [{\n  json: { html, fileName },\n  binary: {\n    data: {\n      data: Buffer.from(html).toString('base64'),\n      mimeType: 'text/html',\n      fileName: fileName\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        336
+      ],
+      "id": "bef2d7d5-2ebf-4c5e-a441-5f9c6f51a830",
+      "name": "Download1"
+    },
+    {
+      "parameters": {
+        "html": "{{ $json.html }}"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        2016,
+        336
+      ],
+      "id": "e366dba2-c18a-4715-81d4-241dda5211e3",
+      "name": "Preview1"
+    },
+    {
+      "parameters": {
+        "content": "## Project 4 v3 - PREMIUM\n\n**Matches Sample Report Quality:**\n✅ Header with meta badges\n✅ Key Metrics cards (28%, $127, etc.)\n✅ Data Foundation (P2/P3 bullets)\n✅ Content Ideas with data tags\n✅ 3 Campaign concepts\n✅ 6 Email subjects with icons\n✅ Competitive Angles section\n✅ Content Priorities (1,2,3,4)\n✅ TikTok captions added",
+        "height": 300,
+        "width": 280
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        560
+      ],
+      "id": "bb70d79f-2375-44dc-bc93-425bb1504aad",
+      "name": "Notes1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"key_metrics\": [\n    {\n      \"value\": \"<metric value>\",\n      \"label\": \"<metric label>\",\n      \"source\": \"<P2 or P3>\"\n    }\n  ],\n  \"data_foundation\": {\n    \"p2_insights\": [\n      \"<insight>\",\n      \"<insight>\",\n      \"<insight>\",\n      \"<insight>\"\n    ],\n    \"p3_insights\": [\n      \"<insight>\",\n      \"<insight>\",\n      \"<insight>\",\n      \"<insight>\"\n    ]\n  },\n  \"executive_summary\": \"<executive summary>\",\n  \"content_ideas\": [\n    {\n      \"type\": \"<content type>\",\n      \"title\": \"<title>\",\n      \"description\": \"<description>\",\n      \"data_connection\": \"<connection to supporting evidence>\",\n      \"seo_keywords\": [\n        \"<keyword>\"\n      ]\n    }\n  ],\n  \"social_captions\": {\n    \"instagram\": [\n      {\n        \"caption\": \"<caption>\",\n        \"hashtags\": [\n          \"<hashtag>\"\n        ]\n      }\n    ],\n    \"pinterest\": [\n      {\n        \"title\": \"<title>\",\n        \"description\": \"<description>\"\n      }\n    ],\n    \"facebook\": [\n      {\n        \"post\": \"<post>\"\n      }\n    ],\n    \"tiktok\": [\n      {\n        \"hook\": \"<hook>\",\n        \"script\": \"<script>\"\n      }\n    ]\n  },\n  \"campaigns\": [\n    {\n      \"name\": \"<campaign name>\",\n      \"tagline\": \"<tagline>\",\n      \"description\": \"<campaign description>\",\n      \"details\": {\n        \"content_pillars\": \"<content pillars>\",\n        \"format\": \"<format>\",\n        \"competitive_angle\": \"<competitive angle>\",\n        \"seo_opportunity\": \"<SEO opportunity>\",\n        \"timing\": \"<timing>\",\n        \"cross_sell\": \"<cross-sell opportunity>\",\n        \"micro_segment\": \"<micro segment>\"\n      }\n    }\n  ],\n  \"email_subjects\": [\n    {\n      \"icon\": \"<emoji>\",\n      \"subject\": \"<email subject>\",\n      \"open_rate\": \"<expected open rate>\"\n    }\n  ],\n  \"competitive_angles\": [\n    {\n      \"title\": \"<competitive angle title>\",\n      \"competitor_gap\": \"<competitor gap>\",\n      \"wayfair_opportunity\": \"<Wayfair opportunity>\"\n    }\n  ],\n  \"content_priorities\": [\n    {\n      \"priority\": 1,\n      \"title\": \"<priority title>\",\n      \"rationale\": \"<rationale>\"\n    }\n  ]\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        992,
+        544
+      ],
+      "id": "3e7080a8-579c-4a49-b66c-c8e08a1424f9",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": "mistral-large-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        928,
+        640
+      ],
+      "id": "e87a31d5-ec10-4c52-b95b-7f87cf371af2",
+      "name": "Mistral Cloud Chat Model",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "Q6cAH0K8nnlpZ49i",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiData = $input.first().json;\nconst sourceData = $('Extract Files1').first().json;\n\nif (!aiData.output || typeof aiData.output !== 'object') {\n  throw new Error('Expected structured AI output in aiData.output.');\n}\n\nreturn [\n  {\n    json: {\n      content: aiData.output,\n      category: sourceData.category || 'Area Rug',\n      focus: sourceData.focus || '',\n      target_audience: sourceData.target_audience || '',\n      content_goal: sourceData.content_goal || '',\n      seasonal_context: sourceData.seasonal_context || '',\n      primary_channel: sourceData.primary_channel || ''\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        336
+      ],
+      "id": "46dee093-5f1a-4c88-bb64-09e72ab66e46",
+      "name": "Prepare HTML Data"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Mistral": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Base Strategy AI",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Tunable Strategy AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Form1": {
+      "main": [
+        [
+          {
+            "node": "Extract Files1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Files1": {
+      "main": [
+        [
+          {
+            "node": "Base Strategy AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Base Strategy AI": {
+      "main": [
+        [
+          {
+            "node": "Tunable Strategy AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tunable Strategy AI": {
+      "main": [
+        [
+          {
+            "node": "Prepare HTML Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build HTML1": {
+      "main": [
+        [
+          {
+            "node": "Download1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download1": {
+      "main": [
+        [
+          {
+            "node": "Preview1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Base Strategy AI",
+            "type": "ai_outputParser",
+            "index": 0
+          },
+          {
+            "node": "Tunable Strategy AI",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral Cloud Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare HTML Data": {
+      "main": [
+        [
+          {
+            "node": "Build HTML1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "0bd6b3c2-a0b7-41d0-8f1d-ab0228e54bbc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7e86a77c9d9e12878cedea63ed7a728527ed2fa5535372c2d9a77750bf775b2b"
+  },
+  "nodeGroups": [],
+  "id": "A9WUZIhyBfB95O3K",
+  "tags": []
+}
